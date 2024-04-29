@@ -5,6 +5,9 @@
 #include <string>
 
 class Citation {
+    std::string text;
+public:
+    Citation(std::string& line) : text{line} {}
 };
 
 #endif
