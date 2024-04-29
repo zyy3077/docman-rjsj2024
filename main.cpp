@@ -5,13 +5,34 @@
 #include "utils.hpp"
 #include "citation.h"
 
+#include <cpp-httplib/httplib.h>
+#include <nlohmann/json.hpp>
+
 std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
     std::vector<Citation*> citations;
     std::ifstream file(filename);
-    std::string line;
-    while(std::getline(file, line)){
-        citations.push_back(new Citation(line));
+    nlohmann::json data = nlohmann::json::parse(file);
+    for(auto c : data["citations"]) {
+        std::string type = c["type"];
+        std::string id = c["id"];
+        if(type == "book"){
+            std::string isbn = c["isbn"];
+            citations.push_back(new Book(id, isbn));
+        }
+        else if(type == "webpage"){
+            std::string url = c["url"];
+            citations.push_back(new Webpage(id, url));
+        }
+        else if(type == "article"){
+            std::string title = c["title"];
+            std::string author = c["author"];
+            std::string journal = c["journal"];
+            std::string year = c["year"];
+            int volume = c["volume"];
+            int issue = c["issue"];
+            citations.push_back(new Article(id, title, author, journal, year, volume, issue));
+        }
     }
     return citations;
 }
