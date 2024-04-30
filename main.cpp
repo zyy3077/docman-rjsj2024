@@ -4,7 +4,6 @@
 
 #include "utils.hpp"
 #include "citation.h"
-
 #include <cpp-httplib/httplib.h>
 #include <nlohmann/json.hpp>
 
@@ -59,6 +58,7 @@ std::string readFromStdin() {
 bool checkBrackets(std::string& input){
     std::vector<char> check{};
     for(char c : input){
+        if(check.size() > 1) return false;
         if(c == '['){
             check.push_back(c);
         }
@@ -74,7 +74,7 @@ bool compare(Citation* a, Citation* b){
     return (a->id < b->id);
 }
 void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCitations, std::vector<Citation*>& citations){
-    std::set<std::string> id{};
+    std::set<std::string> inputID{};
     bool record = false;
     std::string temp;
     for (char c : input) {
@@ -83,13 +83,13 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
             temp = "";
         } else if (c == ']') {
             record = false;
-            id.insert(temp);
+            inputID.insert(temp);
         } else if (record) {
             temp += c;
         }
     }
     for(auto c : citations){
-        if(std::find(id.begin(), id.end(), c->id) != id.end()){
+        if(std::find(inputID.begin(), inputID.end(), c->id) != inputID.end()){
             printedCitations.push_back(c);
         }
     }
@@ -142,17 +142,17 @@ int main(int argc, char** argv) {
     for (auto c : printedCitations) {
         // FIXME: print citation
         *output << '[' << c->id << "] ";
-        if(typeid(c) == typeid(Book*)){
+        if(c->type == Citation::BOOK){
             Book* b = static_cast<Book*>(c);
             *output << "book: " << b->author << ", "<< b->title << ", "<< b->publisher << ", " << b->year << '\n';
         }
-        else if(typeid(c) == typeid(Webpage*)){
+        else if(c->type == Citation::WEBPAGE){
             Webpage* b = static_cast<Webpage*>(c);
             *output << "webpage: " << b->title << ". Available at " << b->url <<'\n';
         }
-        else if(typeid(c) == typeid(Article*)){
+        else if(c->type == Citation::ARTICLE){
             Article* b = static_cast<Article*>(c);
-            *output << "article:  发表年份, 卷号, 期号" << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
+            *output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
 
