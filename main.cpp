@@ -8,6 +8,8 @@
 #include <cpp-httplib/httplib.h>
 #include <nlohmann/json.hpp>
 
+httplib::Client client{ API_ENDPOINT };
+
 std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
     std::vector<Citation*> citations;
@@ -70,7 +72,25 @@ int main(int argc, char** argv) {
 
     auto citations = loadCitations(citationPath);
     std::vector<Citation*> printedCitations{};
-
+    for (auto c : citations){
+        if(typeid(c) == typeid(Book)){
+            Book* b = static_cast<Book*>(c);
+            auto isbn = b->isbn;
+            auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
+            auto content = nlohmann::json::parse(result->body);
+            b->author = content["author"];
+            b->title = content["title"];
+            b->publisher = content["publisher"];
+            b->year = content["year"];
+        }
+        else if(typeid(c) == typeid(Webpage)){
+            Webpage* w = static_cast<Webpage*>(c);
+            auto url = w->url;
+            auto result = client.Get("/title/" + encodeUriComponent(url));
+            auto content = nlohmann::json::parse(result->body);
+            w->title = content["title"];
+        }
+    }
     std::string input;
     if (inputPath == "-") {
         input = readFromStdin();
@@ -88,8 +108,9 @@ int main(int argc, char** argv) {
     *output << input;  // print the paragraph first
     *output << "\nReferences:\n";
     
-    for (auto c : printedCitations) {
+    for (auto c : citations) {
         // FIXME: print citation
+
 
     }
 
