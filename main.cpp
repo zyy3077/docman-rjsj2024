@@ -12,6 +12,7 @@ httplib::Client client{ API_ENDPOINT };
 
 std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
+    //初始化所有json中的book web article，包含标题 id 作者等所有信息
     std::vector<Citation*> citations;
     std::ifstream file(filename);
     nlohmann::json data = nlohmann::json::parse(file);
@@ -20,17 +21,21 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::string id = c["id"];
         if(type == "book"){
             std::string isbn = c["isbn"];
-            citations.push_back(new Book(id, isbn));
+            auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
+            auto content = nlohmann::json::parse(result->body);
+            citations.push_back(new Book(id, content["title"], content["author"], content["publisher"], content["year"]));
         }
         else if(type == "webpage"){
             std::string url = c["url"];
-            citations.push_back(new Webpage(id, url));
+            auto result = client.Get("/title/" + encodeUriComponent(url));
+            auto content = nlohmann::json::parse(result->body);
+            citations.push_back(new Webpage(id, url, content["title"]));
         }
         else if(type == "article"){
             std::string title = c["title"];
             std::string author = c["author"];
             std::string journal = c["journal"];
-            std::string year = c["year"];
+            int year = c["year"];
             int volume = c["volume"];
             int issue = c["issue"];
             citations.push_back(new Article(id, title, author, journal, year, volume, issue));
@@ -40,6 +45,7 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 }
 
 std::string readFromFile(const std::string& filename) {
+    //读input文章
     std::ifstream file(filename);
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     return content;
@@ -50,6 +56,45 @@ std::string readFromStdin() {
     return content;
 }
 
+bool checkBrackets(std::string& input){
+    std::vector<char> check{};
+    for(char c : input){
+        if(c == '['){
+            check.push_back(c);
+        }
+        else if(c == ']'){
+            if(check.empty()) return false;
+            check.pop_back();
+        }
+    }
+    return check.empty();
+}
+
+bool compare(Citation* a, Citation* b){
+    return (a->id < b->id);
+}
+void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCitations, std::vector<Citation*>& citations){
+    std::set<std::string> id{};
+    bool record = false;
+    std::string temp;
+    for (char c : input) {
+        if (c == '[') {
+            record = true;
+            temp = "";
+        } else if (c == ']') {
+            record = false;
+            id.insert(temp);
+        } else if (record) {
+            temp += c;
+        }
+    }
+    for(auto c : citations){
+        if(std::find(id.begin(), id.end(), c->id) != id.end()){
+            printedCitations.push_back(c);
+        }
+    }
+    std::sort(printedCitations.begin(), printedCitations.end(), compare);
+}
 int main(int argc, char** argv) {
     // "docman", "-c", "citations.json", "input.txt"
 
@@ -72,31 +117,17 @@ int main(int argc, char** argv) {
 
     auto citations = loadCitations(citationPath);
     std::vector<Citation*> printedCitations{};
-    for (auto c : citations){
-        if(typeid(c) == typeid(Book)){
-            Book* b = static_cast<Book*>(c);
-            auto isbn = b->isbn;
-            auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
-            auto content = nlohmann::json::parse(result->body);
-            b->author = content["author"];
-            b->title = content["title"];
-            b->publisher = content["publisher"];
-            b->year = content["year"];
-        }
-        else if(typeid(c) == typeid(Webpage)){
-            Webpage* w = static_cast<Webpage*>(c);
-            auto url = w->url;
-            auto result = client.Get("/title/" + encodeUriComponent(url));
-            auto content = nlohmann::json::parse(result->body);
-            w->title = content["title"];
-        }
-    }
+
+
     std::string input;
     if (inputPath == "-") {
         input = readFromStdin();
     } else {
         input = readFromFile(inputPath);
     }
+
+    if(!checkBrackets(input)) std::exit(1);
+    getPrintedCitations(input, printedCitations, citations);
 
     std::ostream* output;
     if (!outputPath.empty()) {
@@ -108,10 +139,21 @@ int main(int argc, char** argv) {
     *output << input;  // print the paragraph first
     *output << "\nReferences:\n";
     
-    for (auto c : citations) {
+    for (auto c : printedCitations) {
         // FIXME: print citation
-
-
+        *output << '[' << c->id << "] ";
+        if(typeid(c) == typeid(Book*)){
+            Book* b = static_cast<Book*>(c);
+            *output << "book: " << b->author << ", "<< b->title << ", "<< b->publisher << ", " << b->year << '\n';
+        }
+        else if(typeid(c) == typeid(Webpage*)){
+            Webpage* b = static_cast<Webpage*>(c);
+            *output << "webpage: " << b->title << ". Available at " << b->url <<'\n';
+        }
+        else if(typeid(c) == typeid(Article*)){
+            Article* b = static_cast<Article*>(c);
+            *output << "article:  发表年份, 卷号, 期号" << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
+        }
     }
 
     for (auto c : citations) {
