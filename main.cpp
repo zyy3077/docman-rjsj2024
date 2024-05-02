@@ -45,7 +45,12 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
 std::string readFromFile(const std::string& filename) {
     //读input文章
+
     std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        std::exit(1);
+    }
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     return content;
 }
