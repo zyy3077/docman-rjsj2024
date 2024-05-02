@@ -17,10 +17,18 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     std::ifstream file(filename);
     nlohmann::json data = nlohmann::json::parse(file);
     for(auto c : data["citations"]) {
+        if(c["type"].is_null() || c["id"].is_null()){
+            std::cerr << "citation type is null" << std::endl;
+            std::exit(1);
+        }
         std::string type = c["type"];
         std::string id = c["id"];
         citationID.push_back(id);
         if(type == "book"){
+            if(c["isbn"].is_null()){
+                std::cerr << "isbn is null" << std::endl;
+                std::exit(1);
+            }
             std::string isbn = c["isbn"];
             auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
             auto content = nlohmann::json::parse(result->body);
@@ -31,6 +39,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
             citations.push_back(new Book(id, content["title"], content["author"], content["publisher"], content["year"]));
         }
         else if(type == "webpage"){
+            if(c["url"].is_null()){
+                std::cerr << "url is null" << std::endl;
+                std::exit(1);
+            }
             std::string url = c["url"];
             auto result = client.Get("/title/" + encodeUriComponent(url));
             auto content = nlohmann::json::parse(result->body);
@@ -41,6 +53,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
             citations.push_back(new Webpage(id, url, content["title"]));
         }
         else if(type == "article"){
+            if(c["title"].is_null() || c["author"].is_null() || c["journal"].is_null() || c["year"].is_null() || c["volume"].is_null() || c["issue"].is_null()){
+                std::cerr << "article value is null" << std::endl;
+                std::exit(1);
+            }
             std::string title = c["title"];
             std::string author = c["author"];
             std::string journal = c["journal"];
