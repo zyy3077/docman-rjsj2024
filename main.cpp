@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 
 httplib::Client client{ API_ENDPOINT };
+std::vector<std::string> citationID{};
 
 std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
@@ -18,6 +19,7 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     for(auto c : data["citations"]) {
         std::string type = c["type"];
         std::string id = c["id"];
+        citationID.push_back(id);
         if(type == "book"){
             std::string isbn = c["isbn"];
             auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
@@ -45,10 +47,9 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
 std::string readFromFile(const std::string& filename) {
     //读input文章
-
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
+        std::cerr << "Failed to open input file: " << filename << std::endl;
         std::exit(1);
     }
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -88,6 +89,10 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
             temp = "";
         } else if (c == ']') {
             record = false;
+            if(find(citationID.begin(), citationID.end(), temp) == citationID.end()){
+                std::cerr << "input id not in the citation json" << std::endl;
+                std::exit(1);
+            }
             inputID.insert(temp);
         } else if (record) {
             temp += c;
@@ -109,15 +114,39 @@ int main(int argc, char** argv) {
     std::string citationPath;
     std::string outputPath;
     std::string inputPath;
-    for (int i = 1; i < argc; i++) {
-        std::string arg(argv[i]);
-        if (arg == "-c" && i + 1 < argc) {
-            citationPath = argv[++i];
-        } else if (arg == "-o" && i + 1 < argc) {
-            outputPath = argv[++i];
-        } else {
-            inputPath = arg;
-        }
+    // for (int i = 1; i < argc; i++) {
+    //     std::string arg(argv[i]);
+    //     if (arg == "-c" && i + 1 < argc) {
+    //         citationPath = argv[++i];
+    //     } else if (arg == "-o" && i + 1 < argc) {
+    //         outputPath = argv[++i];
+    //     } else {
+    //         inputPath = arg;
+    //     }
+    // }
+    if(argc < 4){
+        std::cerr << "more arguments needed" << std::endl;
+        std::exit(1);
+    }
+    if(argc > 4){
+        std::cerr << "too much arguments" << std::endl;
+        std::exit(1);
+    }
+    if(std::string(argv[1]) != "-c"){
+        std::cerr << "first option should be -c but is " << argv[1] << std::endl;
+        std::exit(1);
+    }
+    citationPath = argv[2];
+    if(std::string(argv[3]) == "-o"){
+        outputPath = argv[4];
+        inputPath = argv[5];
+    }
+    else{
+        inputPath = argv[3];
+    }
+    if(inputPath == outputPath){
+        std::cerr << "inputpath should be different from outputpath" << std::endl;
+        std::exit(1);
     }
 
     auto citations = loadCitations(citationPath);
@@ -137,6 +166,10 @@ int main(int argc, char** argv) {
     std::ostream* output;
     if (!outputPath.empty()) {
         output = new std::ofstream(outputPath);
+        if (!output->good()) {
+        std::cerr << "Failed to open output file: " << outputPath << std::endl;
+        std::exit(1);
+    }
     } else {
         output = &std::cout;
     }
