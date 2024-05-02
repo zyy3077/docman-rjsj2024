@@ -76,6 +76,9 @@ std::string readFromFile(const std::string& filename) {
         std::exit(1);
     }
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    if (!content.empty() && content.back() == '\n') {
+        content.pop_back();
+    }
     return content;
 }
 
@@ -197,7 +200,7 @@ int main(int argc, char** argv) {
         output = &std::cout;
     }
 
-    *output << input;  // print the paragraph first
+    *output << input << '\n';  // print the paragraph first
     *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
