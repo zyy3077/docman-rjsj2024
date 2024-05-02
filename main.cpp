@@ -17,44 +17,43 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     std::ifstream file(filename);
     nlohmann::json data = nlohmann::json::parse(file);
     for(auto c : data["citations"]) {
-        if(c["type"].is_null() || c["id"].is_null()){
-            std::cerr << "citation type is null" << std::endl;
+        if(!c["type"].is_string() || !c["id"].is_string()){
             std::exit(1);
         }
         std::string type = c["type"];
         std::string id = c["id"];
         citationID.push_back(id);
         if(type == "book"){
-            if(c["isbn"].is_null()){
-                std::cerr << "isbn is null" << std::endl;
+            if(!c["isbn"].is_string()){
+                std::cerr << "isbn is typewrong" << std::endl;
                 std::exit(1);
             }
             std::string isbn = c["isbn"];
             auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
             auto content = nlohmann::json::parse(result->body);
-            if(content["title"].is_null() || content["author"].is_null() || content["publisher"].is_null() || content["year"].is_null()){
-                std::cerr << "Value for book is null." << std::endl;
+            if(!content["title"].is_string() || !content["author"].is_string() || !content["publisher"].is_string() || !content["year"].is_string()){
+                std::cerr << "Value for book is typewrong." << std::endl;
                 std::exit(1);
             }
             citations.push_back(new Book(id, content["title"], content["author"], content["publisher"], content["year"]));
         }
         else if(type == "webpage"){
-            if(c["url"].is_null()){
-                std::cerr << "url is null" << std::endl;
+            if(!c["url"].is_string()){
+                std::cerr << "url is typewrong" << std::endl;
                 std::exit(1);
             }
             std::string url = c["url"];
             auto result = client.Get("/title/" + encodeUriComponent(url));
             auto content = nlohmann::json::parse(result->body);
-            if(content["title"].is_null()){
-                std::cerr << "Value for web is null," << std::endl;
+            if(!content["title"].is_string()){
+                std::cerr << "Value for web is typewrong," << std::endl;
                 std::exit(1);
             }
             citations.push_back(new Webpage(id, url, content["title"]));
         }
         else if(type == "article"){
-            if(c["title"].is_null() || c["author"].is_null() || c["journal"].is_null() || c["year"].is_null() || c["volume"].is_null() || c["issue"].is_null()){
-                std::cerr << "article value is null" << std::endl;
+            if(!c["title"].is_string() || !c["author"].is_string() || !c["journal"].is_string() || !c["year"].is_number_integer() || !c["volume"].is_number_integer() || !c["issue"].is_number_integer()){
+                std::cerr << "article value is typewrong" << std::endl;
                 std::exit(1);
             }
             std::string title = c["title"];
