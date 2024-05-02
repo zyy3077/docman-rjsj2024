@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         std::cerr << "more arguments needed" << std::endl;
         std::exit(1);
     }
-    if(argc > 4){
+    if(argc > 6){
         std::cerr << "too much arguments" << std::endl;
         std::exit(1);
     }
