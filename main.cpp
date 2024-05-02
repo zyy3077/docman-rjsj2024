@@ -24,12 +24,20 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
             std::string isbn = c["isbn"];
             auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
             auto content = nlohmann::json::parse(result->body);
+            if(content["title"].is_null() || content["author"].is_null() || content["publisher"].is_null() || content["year"].is_null()){
+                std::cerr << "Value for book is null." << std::endl;
+                std::exit(1);
+            }
             citations.push_back(new Book(id, content["title"], content["author"], content["publisher"], content["year"]));
         }
         else if(type == "webpage"){
             std::string url = c["url"];
             auto result = client.Get("/title/" + encodeUriComponent(url));
             auto content = nlohmann::json::parse(result->body);
+            if(content["title"].is_null()){
+                std::cerr << "Value for web is null," << std::endl;
+                std::exit(1);
+            }
             citations.push_back(new Webpage(id, url, content["title"]));
         }
         else if(type == "article"){
