@@ -35,7 +35,7 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     do {
         file >> firstChar;
     } while (std::isspace(firstChar));
-    if (firstChar != '{' && firstChar != '[') {
+    if (firstChar != '"') {
         std::cerr << "Invalid JSON string in file: " << filename << std::endl;
         std::exit(1);
     }
