@@ -14,12 +14,40 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
     //初始化所有json中的book web article，包含标题 id 作者等所有信息
     std::vector<Citation*> citations;
+
+    //nlohmann::json data = nlohmann::json::parse(file);
     std::ifstream file(filename);
-    if(!file.is_open() || !file.good()){
-        std::cerr << "load citation error\n";
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
         std::exit(1);
     }
-    nlohmann::json data = nlohmann::json::parse(file);
+
+    // Check if file is empty
+    file.seekg(0, std::ios::end);
+    if (file.tellg() == 0) {
+        std::cerr << "File is empty\n";
+        std::exit(1);
+    }
+    file.seekg(0, std::ios::beg); // reset file pointer to the beginning
+
+    // Check if the first character is a double quote
+    char firstChar;
+    file >> firstChar;
+    if (firstChar != '"') {
+        std::cerr << "Invalid JSON string in file: " << filename << std::endl;
+        std::exit(1);
+    }
+    file.seekg(0, std::ios::beg); // reset file pointer to the beginning
+
+    nlohmann::json data;
+    try {
+        data = nlohmann::json::parse(file);
+        // use data...
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
+        std::exit(1);
+    }
+    
     for(auto c : data["citations"]) {
         if(!c["type"].is_string() || !c["id"].is_string()){
             std::exit(1);
