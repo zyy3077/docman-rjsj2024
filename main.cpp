@@ -32,8 +32,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
     // Check if the first character is a double quote
     char firstChar;
-    file >> firstChar;
-    if (firstChar != '"') {
+    do {
+        file >> firstChar;
+    } while (std::isspace(firstChar));
+    if (firstChar != '{' && firstChar != '[') {
         std::cerr << "Invalid JSON string in file: " << filename << std::endl;
         std::exit(1);
     }
