@@ -32,10 +32,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
         data = nlohmann::json::parse(file);
         // Check if data is an object
-        if (!data.is_object()) {
-            std::cerr << "Invalid JSON object in file: " << filename << std::endl;
-            std::exit(1);
-        }
+    if (!data.is_object() || data.find("citations") == data.end()) {
+        std::cerr << "Invalid JSON object in file: " << filename << std::endl;
+        std::exit(1);
+    }
         // use data...
     } catch (nlohmann::json::parse_error& e) {
         std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
