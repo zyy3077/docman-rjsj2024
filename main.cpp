@@ -31,12 +31,12 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     file.seekg(0, std::ios::beg); // reset file pointer to the beginning
 
     // Check if the first character is a double quote
-    char firstChar;
-    file >> firstChar;
-    if (firstChar != '"') {
-        std::cerr << "Invalid JSON string in file: " << filename << std::endl;
-        std::exit(1);
-    }
+    // char firstChar;
+    // file >> firstChar;
+    // if (firstChar != '"') {
+    //     std::cerr << "Invalid JSON string in file: " << filename << std::endl;
+    //     std::exit(1);
+    // }
     file.seekg(0, std::ios::beg); // reset file pointer to the beginning
 
     nlohmann::json data;
@@ -47,7 +47,7 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
         std::exit(1);
     }
-    
+
     for(auto c : data["citations"]) {
         if(!c["type"].is_string() || !c["id"].is_string()){
             std::exit(1);
