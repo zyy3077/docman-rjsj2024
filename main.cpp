@@ -15,6 +15,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     //初始化所有json中的book web article，包含标题 id 作者等所有信息
     std::vector<Citation*> citations;
     std::ifstream file(filename);
+    if(!file.is_open() || !file.good()){
+        std::cerr << "load citation error\n";
+        std::exit(1);
+    }
     nlohmann::json data = nlohmann::json::parse(file);
     for(auto c : data["citations"]) {
         if(!c["type"].is_string() || !c["id"].is_string()){
@@ -30,6 +34,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
             }
             std::string isbn = c["isbn"];
             auto result = client.Get("/isbn/" + encodeUriComponent(isbn));
+            if(result->body.empty()){
+                std::cerr << "empty jsonstr\n";
+                std::exit(1);
+            }
             auto content = nlohmann::json::parse(result->body);
             if(!content["title"].is_string() || !content["author"].is_string() || !content["publisher"].is_string() || !content["year"].is_string()){
                 std::cerr << "Value for book is typewrong." << std::endl;
@@ -44,6 +52,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
             }
             std::string url = c["url"];
             auto result = client.Get("/title/" + encodeUriComponent(url));
+            if(result->body.empty()){
+                std::cerr << "empty jsonstr\n";
+                std::exit(1);
+            }
             auto content = nlohmann::json::parse(result->body);
             if(!content["title"].is_string()){
                 std::cerr << "Value for web is typewrong," << std::endl;
