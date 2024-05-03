@@ -24,6 +24,12 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
     nlohmann::json data;
     try {
+        // Check if file is empty
+        if (file.peek() == std::ifstream::traits_type::eof()) {
+            std::cerr << "Empty file: " << filename << std::endl;
+            std::exit(1);
+        }
+
         data = nlohmann::json::parse(file);
         // Check if data is an object
         if (!data.is_object()) {
