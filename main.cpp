@@ -22,28 +22,14 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::exit(1);
     }
 
-    // Check if file is empty
-    file.seekg(0, std::ios::end);
-    if (file.tellg() == 0) {
-        std::cerr << "File is empty\n";
-        std::exit(1);
-    }
-    file.seekg(0, std::ios::beg); // reset file pointer to the beginning
-
-    // Check if the first character is a double quote
-    char firstChar;
-    do {
-        file >> firstChar;
-    } while (std::isspace(firstChar));
-    if (firstChar != '"') {
-        std::cerr << "Invalid JSON string in file: " << filename << std::endl;
-        std::exit(1);
-    }
-    file.seekg(0, std::ios::beg); // reset file pointer to the beginning
-
     nlohmann::json data;
     try {
         data = nlohmann::json::parse(file);
+        // Check if data is an object
+        if (!data.is_object()) {
+            std::cerr << "Invalid JSON object in file: " << filename << std::endl;
+            std::exit(1);
+        }
         // use data...
     } catch (nlohmann::json::parse_error& e) {
         std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
