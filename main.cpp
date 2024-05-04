@@ -12,15 +12,19 @@ std::vector<std::string> citationID{};
 
 void checkFile(std::ifstream& file){
     if (!file.is_open()) {
+        std::cerr << "Failed to open file\n";
         std::exit(1);
     }
     if (file.peek() == std::ifstream::traits_type::eof()) {
+        std::cerr << "empty file\n";
         std::exit(1);
     }
     if (file.fail()) {
+        std::cerr << "Failed to read file\n";
         std::exit(1);
     }
     if (file.eof()) {
+        std::cerr << "empty file\n";
         std::exit(1);
     }
 }
@@ -105,30 +109,17 @@ std::string readFromFile(const std::string& filename) {
     std::ifstream file(filename);
     checkFile(file);
     std::string content((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
-    // std::string line;
-    // while (std::getline(file, line)) {
-    //     content += line + '\n';
-    // }
-    // if(content.back() != '\n'){
-    //     content += '\n';
-    // }
     return content;
 }
 
 std::string readFromStdin() {
     std::string content((std::istreambuf_iterator<char>(std::cin)),std::istreambuf_iterator<char>());
-    // std::string content;
-    // std::string line;
-    // while (std::getline(std::cin, line)) {
-    //     content += line + '\n';
-    // }
     if (content.empty()) {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
     return content;
 }
-
 
 bool checkBrackets(std::string& input){
     std::vector<char> check{};
@@ -148,16 +139,19 @@ bool checkBrackets(std::string& input){
 bool compare(Citation* a, Citation* b){
     return (a->id < b->id);
 }
+
 void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCitations, std::vector<Citation*>& citations){
     std::set<std::string> inputID{};
     bool record = false;
     std::string temp;
+    //记录input中出现的id
     for (char c : input) {
         if (c == '[') {
             record = true;
             temp = "";
         } else if (c == ']') {
             record = false;
+            //input中出现不在citation中的id
             if(find(citationID.begin(), citationID.end(), temp) == citationID.end()){
                 std::cerr << "input id not in the citation json" << std::endl;
                 std::exit(1);
@@ -167,6 +161,7 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
             temp += c;
         }
     }
+    //citation中在input文章中出现id的引用
     for(auto c : citations){
         if(std::find(inputID.begin(), inputID.end(), c->id) != inputID.end()){
             printedCitations.push_back(c);
@@ -174,20 +169,16 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
     }
     std::sort(printedCitations.begin(), printedCitations.end(), compare);
 }
-int main(int argc, char** argv) {
-    // "docman", "-c", "citations.json", "input.txt"
 
-    // FIXME: read all input to the string, and process citations in the input text
+int main(int argc, char** argv) {
+
     std::string citationPath;
     std::string outputPath;
     std::string inputPath;
 
-    if(argc < 4){
-        std::cerr << "more arguments needed" << std::endl;
-        std::exit(1);
-    }
-    if(argc > 6){
-        std::cerr << "too much arguments" << std::endl;
+    //命令行参数
+    if(argc < 4 || argc > 6 || argc == 5){
+        std::cerr << "wrong argument number" << std::endl;
         std::exit(1);
     }
     if(std::string(argv[1]) != "-c"){
@@ -210,7 +201,7 @@ int main(int argc, char** argv) {
     auto citations = loadCitations(citationPath);
     std::vector<Citation*> printedCitations{};
 
-
+    //输入
     std::string input;
     if (inputPath == "-") {
         input = readFromStdin();
@@ -218,22 +209,22 @@ int main(int argc, char** argv) {
         input = readFromFile(inputPath);
     }
 
+    //不成对括号
     if(!checkBrackets(input)) std::exit(1);
+    //被引用的文献
     getPrintedCitations(input, printedCitations, citations);
 
+    //输出
     std::ofstream fileStream;
     std::ostream& output = (outputPath.empty()) ? std::cout : (fileStream.open(outputPath), fileStream);
-
     if (!output.good()) {
         std::cerr << "Failed to open output file: " << outputPath << std::endl;
         std::exit(1);
     }
-
     output << input << '\n';  // print the paragraph first
     output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
-        // FIXME: print citation
         output << '[' << c->id << "] ";
         if(c->type == Citation::BOOK){
             Book* b = static_cast<Book*>(c);
@@ -248,6 +239,7 @@ int main(int argc, char** argv) {
             output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
+    
     for (auto c : citations) {
         delete c;
     }
