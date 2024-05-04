@@ -105,28 +105,19 @@ std::string readFromFile(const std::string& filename) {
     std::ifstream file(filename);
     checkFile(file);
     std::string content;
-    std::string line;
-    while (std::getline(file, line)) {
-        content += line + '\n';
+    char ch;
+    while (std::cin.get(ch) && !std::cin.eof()) {
+        content += ch;
     }
-    // if (file.fail()) {
-    //     std::cerr << "Failed to read input file: " << filename << std::endl;
-    //     std::exit(1);
-    // }
-
     return content;
 }
 
 std::string readFromStdin() {
     std::string content;
-    std::string line;
-    while (std::getline(std::cin, line)) {
-        content += line + '\n';
+    char ch;
+    while (std::cin.get(ch) && !std::cin.eof()) {
+        content += ch;
     }
-    // if (std::cin.fail()) {
-    //     std::cerr << "Failed to read from standard input." << std::endl;
-    //     std::exit(1);
-    // }
     if (content.empty()) {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
@@ -134,6 +125,7 @@ std::string readFromStdin() {
 
     return content;
 }
+
 
 bool checkBrackets(std::string& input){
     std::vector<char> check{};
