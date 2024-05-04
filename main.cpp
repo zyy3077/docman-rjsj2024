@@ -113,9 +113,7 @@ std::string readFromFile(const std::string& filename) {
         std::cerr << "Failed to read input file: " << filename << std::endl;
         std::exit(1);
     }
-    // if (!content.empty() && content.back() == '\n') {
-    //     content.pop_back();
-    // }
+
     return content;
 }
 
@@ -125,17 +123,15 @@ std::string readFromStdin() {
     while (std::getline(std::cin, line)) {
         content += line + '\n';
     }
-    if (std::cin.fail()) {
-        std::cerr << "Failed to read from standard input." << std::endl;
-        std::exit(1);
-    }
+    // if (std::cin.fail()) {
+    //     std::cerr << "Failed to read from standard input." << std::endl;
+    //     std::exit(1);
+    // }
     if (content.empty()) {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-    // if (content.back() == '\n') {
-    //     content.pop_back();
-    // }
+
     return content;
 }
 
@@ -179,10 +175,6 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
     for(auto c : citations){
         if(std::find(inputID.begin(), inputID.end(), c->id) != inputID.end()){
             printedCitations.push_back(c);
-        }
-        else{
-            std::cerr << "unfound ID\n";
-            std::exit(1);
         }
     }
     std::sort(printedCitations.begin(), printedCitations.end(), compare);
@@ -245,7 +237,7 @@ int main(int argc, char** argv) {
         output = &std::cout;
     }
 
-    *output << input << '\n';  // print the paragraph first
+    *output << input;  // print the paragraph first
     *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
