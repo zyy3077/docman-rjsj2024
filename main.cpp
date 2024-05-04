@@ -221,37 +221,33 @@ int main(int argc, char** argv) {
     if(!checkBrackets(input)) std::exit(1);
     getPrintedCitations(input, printedCitations, citations);
 
-    std::ostream* output;
-    if (!outputPath.empty()) {
-        output = new std::ofstream(outputPath);
-        if (!output->good()) {
-            std::cerr << "Failed to open output file: " << outputPath << std::endl;
-            std::exit(1);
-        }
-    } else {
-        output = &std::cout;
+    std::ofstream fileStream;
+    std::ostream& output = (outputPath.empty()) ? std::cout : (fileStream.open(outputPath), fileStream);
+
+    if (!output.good()) {
+        std::cerr << "Failed to open output file: " << outputPath << std::endl;
+        std::exit(1);
     }
 
-    *output << input;  // print the paragraph first
-    *output << "\nReferences:\n";
+    output << input << '\n';  // print the paragraph first
+    output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
         // FIXME: print citation
-        *output << '[' << c->id << "] ";
+        output << '[' << c->id << "] ";
         if(c->type == Citation::BOOK){
             Book* b = static_cast<Book*>(c);
-            *output << "book: " << b->author << ", "<< b->title << ", "<< b->publisher << ", " << b->year << '\n';
+            output << "book: " << b->author << ", "<< b->title << ", "<< b->publisher << ", " << b->year << '\n';
         }
         else if(c->type == Citation::WEBPAGE){
             Webpage* b = static_cast<Webpage*>(c);
-            *output << "webpage: " << b->title << ". Available at " << b->url <<'\n';
+            output << "webpage: " << b->title << ". Available at " << b->url <<'\n';
         }
         else if(c->type == Citation::ARTICLE){
             Article* b = static_cast<Article*>(c);
-            *output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
+            output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
-    //delete output;
     for (auto c : citations) {
         delete c;
     }
