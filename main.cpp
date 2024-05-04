@@ -97,26 +97,34 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 }
 
 std::string readFromFile(const std::string& filename) {
-    //读input文章
+    //读input文章文件
     if (!std::filesystem::exists(filename)) {
         std::cerr << "File does not exist: " << filename << std::endl;
         std::exit(1);
     }
     std::ifstream file(filename);
     checkFile(file);
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string content;
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        content += line + '\n';
+    }
     if (file.fail()) {
         std::cerr << "Failed to read input file: " << filename << std::endl;
         std::exit(1);
     }
-    if (!content.empty() && content.back() == '\n') {
-        content.pop_back();
-    }
+    // if (!content.empty() && content.back() == '\n') {
+    //     content.pop_back();
+    // }
     return content;
 }
 
 std::string readFromStdin() {
-    std::string content((std::istreambuf_iterator<char>(std::cin)), std::istreambuf_iterator<char>());
+    std::string content;
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        content += line + '\n';
+    }
     if (std::cin.fail()) {
         std::cerr << "Failed to read from standard input." << std::endl;
         std::exit(1);
@@ -125,9 +133,9 @@ std::string readFromStdin() {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-    if (content.back() == '\n') {
-        content.pop_back();
-    }
+    // if (content.back() == '\n') {
+    //     content.pop_back();
+    // }
     return content;
 }
 
@@ -256,7 +264,7 @@ int main(int argc, char** argv) {
             *output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
-    delete output;
+    //delete output;
     for (auto c : citations) {
         delete c;
     }
