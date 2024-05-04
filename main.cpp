@@ -12,19 +12,15 @@ std::vector<std::string> citationID{};
 
 void checkFile(std::ifstream& file){
     if (!file.is_open()) {
-        std::cerr << "Failed to open file " << std::endl;
         std::exit(1);
     }
     if (file.peek() == std::ifstream::traits_type::eof()) {
-        std::cerr << "Empty file: " << std::endl;
         std::exit(1);
     }
     if (file.fail()) {
-        std::cerr << "Failed to parse JSON from file: " << std::endl;
         std::exit(1);
     }
     if (file.eof()) {
-        std::cerr << "Reached end of file: " << std::endl;
         std::exit(1);
     }
 }
@@ -108,10 +104,7 @@ std::string readFromFile(const std::string& filename) {
         std::exit(1);
     }
     std::ifstream file(filename);
-    if (file.fail()) {
-        std::cerr << "Failed to open input file: " << filename << std::endl;
-        std::exit(1);
-    }
+    checkFile(file);
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     if (file.fail()) {
         std::cerr << "Failed to read input file: " << filename << std::endl;
@@ -125,6 +118,10 @@ std::string readFromFile(const std::string& filename) {
 
 std::string readFromStdin() {
     std::string content((std::istreambuf_iterator<char>(std::cin)), std::istreambuf_iterator<char>());
+    if (std::cin.fail()) {
+        std::cerr << "Failed to read from standard input." << std::endl;
+        std::exit(1);
+    }
     if (!content.empty() && content.back() == '\n') {
         content.pop_back();
     }
