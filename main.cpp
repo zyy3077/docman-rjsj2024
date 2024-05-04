@@ -109,8 +109,8 @@ std::string readFromFile(const std::string& filename) {
     while (file.get(ch) && !file.eof()) {
         content += ch;
     }
-    if(!content.back() == '\n'){
-        content.push_back('\n');
+    if(content.back() != '\n'){
+        content += '\n';
     }
     return content;
 }
@@ -125,8 +125,8 @@ std::string readFromStdin() {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-    if(!content.back() == '\n'){
-        content.push_back('\n');
+    if(content.back() != '\n'){
+        content += '\n';
     }
 
     return content;
