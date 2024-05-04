@@ -22,25 +22,25 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::exit(1);
     }
 
-    nlohmann::json data;
-    try {
-        // Check if file is empty
-        if (file.peek() == std::ifstream::traits_type::eof()) {
-            std::cerr << "Empty file: " << filename << std::endl;
-            std::exit(1);
-        }
+    nlohmann::json data = nlohmann::json::parse(file);
+    // try {
+    //     // Check if file is empty
+    //     if (file.peek() == std::ifstream::traits_type::eof()) {
+    //         std::cerr << "Empty file: " << filename << std::endl;
+    //         std::exit(1);
+    //     }
 
-        data = nlohmann::json::parse(file);
-        // Check if data is an object
-    if (!data.is_object() || data.find("citations") == data.end()) {
-        std::cerr << "Invalid JSON object in file: " << filename << std::endl;
-        std::exit(1);
-    }
-        // use data...
-    } catch (nlohmann::json::parse_error& e) {
-        std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
-        std::exit(1);
-    }
+    //     data = nlohmann::json::parse(file);
+    //     // Check if data is an object
+    //     if (!data.is_object() || data.find("citations") == data.end()) {
+    //         std::cerr << "Invalid JSON object in file: " << filename << std::endl;
+    //         std::exit(1);
+    //     }
+    //     // use data...
+    // } catch (nlohmann::json::parse_error& e) {
+    //     std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
+    //     std::exit(1);
+    // }
 
     for(auto c : data["citations"]) {
         if(!c["type"].is_string() || !c["id"].is_string()){
