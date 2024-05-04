@@ -108,8 +108,15 @@ std::string readFromFile(const std::string& filename) {
         std::exit(1);
     }
     std::ifstream file(filename);
-    checkFile(file);
+    if (file.fail()) {
+        std::cerr << "Failed to open input file: " << filename << std::endl;
+        std::exit(1);
+    }
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    if (file.fail()) {
+        std::cerr << "Failed to read input file: " << filename << std::endl;
+        std::exit(1);
+    }
     if (!content.empty() && content.back() == '\n') {
         content.pop_back();
     }
