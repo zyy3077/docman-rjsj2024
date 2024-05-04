@@ -125,9 +125,7 @@ std::string readFromStdin() {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-    // if(content.back() != '\n'){
-    //     content += '\n';
-    // }
+
 
     return content;
 }
@@ -235,7 +233,7 @@ int main(int argc, char** argv) {
         output = &std::cout;
     }
 
-    *output << input << '\n';  // print the paragraph first
+    *output << input;  // print the paragraph first
     *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
