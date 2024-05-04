@@ -32,7 +32,10 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
     //初始化所有json中的book web article，包含标题 id 作者等所有信息
     std::vector<Citation*> citations;
-
+    if (!std::filesystem::exists(filename)) {
+        std::cerr << "File does not exist: " << filename << std::endl;
+        std::exit(1);
+    }
     //nlohmann::json data = nlohmann::json::parse(file);
     std::ifstream file(filename);
     checkFile(file);
@@ -100,6 +103,11 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
 std::string readFromFile(const std::string& filename) {
     //读input文章
+    
+    if (!std::filesystem::exists(filename)) {
+        std::cerr << "File does not exist: " << filename << std::endl;
+        std::exit(1);
+    }
     std::ifstream file(filename);
     checkFile(file);
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
