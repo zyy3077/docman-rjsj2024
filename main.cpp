@@ -104,11 +104,11 @@ std::string readFromFile(const std::string& filename) {
     }
     std::ifstream file(filename);
     checkFile(file);
-    std::string content;
-    std::string line;
-    while (std::getline(file, line)) {
-        content += line + '\n';
-    }
+    std::string content((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+    // std::string line;
+    // while (std::getline(file, line)) {
+    //     content += line + '\n';
+    // }
     // if(content.back() != '\n'){
     //     content += '\n';
     // }
@@ -116,11 +116,12 @@ std::string readFromFile(const std::string& filename) {
 }
 
 std::string readFromStdin() {
-    std::string content;
-    std::string line;
-    while (std::getline(std::cin, line)) {
-        content += line + '\n';
-    }
+    std::string content((std::istreambuf_iterator<char>(std::cin)),std::istreambuf_iterator<char>());
+    // std::string content;
+    // std::string line;
+    // while (std::getline(std::cin, line)) {
+    //     content += line + '\n';
+    // }
     if (content.empty()) {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
