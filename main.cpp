@@ -106,7 +106,7 @@ std::string readFromFile(const std::string& filename) {
     checkFile(file);
     std::string content;
     std::string line;
-    while (std::getline(std::cin, line)) {
+    while (std::getline(file, line)) {
         content += line + '\n';
     }
     if (file.fail()) {
