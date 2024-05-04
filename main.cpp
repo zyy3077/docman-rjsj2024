@@ -122,7 +122,11 @@ std::string readFromStdin() {
         std::cerr << "Failed to read from standard input." << std::endl;
         std::exit(1);
     }
-    if (!content.empty() && content.back() == '\n') {
+    if (content.empty()) {
+        std::cerr << "Standard input is empty." << std::endl;
+        std::exit(1);
+    }
+    if (content.back() == '\n') {
         content.pop_back();
     }
     return content;
