@@ -98,7 +98,6 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
 std::string readFromFile(const std::string& filename) {
     //读input文章
-    
     if (!std::filesystem::exists(filename)) {
         std::cerr << "File does not exist: " << filename << std::endl;
         std::exit(1);
@@ -231,9 +230,9 @@ int main(int argc, char** argv) {
     if (!outputPath.empty()) {
         output = new std::ofstream(outputPath);
         if (!output->good()) {
-        std::cerr << "Failed to open output file: " << outputPath << std::endl;
-        std::exit(1);
-    }
+            std::cerr << "Failed to open output file: " << outputPath << std::endl;
+            std::exit(1);
+        }
     } else {
         output = &std::cout;
     }
@@ -257,7 +256,7 @@ int main(int argc, char** argv) {
             *output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
-
+    delete output;
     for (auto c : citations) {
         delete c;
     }
