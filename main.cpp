@@ -234,6 +234,7 @@ int main(int argc, char** argv) {
     }
 
     *output << input;  // print the paragraph first
+    *output << std::endl;
     *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
