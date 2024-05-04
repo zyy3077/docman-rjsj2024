@@ -105,9 +105,9 @@ std::string readFromFile(const std::string& filename) {
     std::ifstream file(filename);
     checkFile(file);
     std::string content;
-    char ch;
-    while (file.get(ch) && !file.eof()) {
-        content += ch;
+    std::string line;
+    while (std::getline(file, line)) {
+        content += line + '\n';
     }
     // if(content.back() != '\n'){
     //     content += '\n';
@@ -117,16 +117,14 @@ std::string readFromFile(const std::string& filename) {
 
 std::string readFromStdin() {
     std::string content;
-    char ch;
-    while (std::cin.get(ch) && !std::cin.eof()) {
-        content += ch;
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        content += line + '\n';
     }
     if (content.empty()) {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-
-
     return content;
 }
 
@@ -234,7 +232,7 @@ int main(int argc, char** argv) {
     }
 
     *output << input;  // print the paragraph first
-    *output << "\n\nReferences:\n";
+    *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
         // FIXME: print citation
