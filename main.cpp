@@ -21,14 +21,21 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::cerr << "Failed to open file: " << filename << std::endl;
         std::exit(1);
     }
-
+    if (file.peek() == std::ifstream::traits_type::eof()) {
+        std::cerr << "Empty file: " << filename << std::endl;
+        std::exit(1);
+    }
+    if (file.fail()) {
+        std::cerr << "Failed to parse JSON from file: " << filename << std::endl;
+        std::exit(1);
+    }
+    if (file.eof()) {
+        std::cerr << "Reached end of file: " << filename << std::endl;
+        std::exit(1);
+    }
     nlohmann::json data = nlohmann::json::parse(file);
-    // try {
-    //     // Check if file is empty
-    //     if (file.peek() == std::ifstream::traits_type::eof()) {
-    //         std::cerr << "Empty file: " << filename << std::endl;
-    //         std::exit(1);
-    //     }
+
+    //     
 
     //     data = nlohmann::json::parse(file);
     //     // Check if data is an object
