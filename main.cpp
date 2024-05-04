@@ -36,7 +36,6 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
         std::cerr << "File does not exist: " << filename << std::endl;
         std::exit(1);
     }
-    //nlohmann::json data = nlohmann::json::parse(file);
     std::ifstream file(filename);
     checkFile(file);
     nlohmann::json data = nlohmann::json::parse(file);
@@ -119,6 +118,9 @@ std::string readFromFile(const std::string& filename) {
 
 std::string readFromStdin() {
     std::string content((std::istreambuf_iterator<char>(std::cin)), std::istreambuf_iterator<char>());
+    if (!content.empty() && content.back() == '\n') {
+        content.pop_back();
+    }
     return content;
 }
 
@@ -163,6 +165,10 @@ void getPrintedCitations(std::string& input, std::vector<Citation*>& printedCita
         if(std::find(inputID.begin(), inputID.end(), c->id) != inputID.end()){
             printedCitations.push_back(c);
         }
+        else{
+            std::cerr << "unfound ID\n";
+            std::exit(1);
+        }
     }
     std::sort(printedCitations.begin(), printedCitations.end(), compare);
 }
@@ -170,21 +176,10 @@ int main(int argc, char** argv) {
     // "docman", "-c", "citations.json", "input.txt"
 
     // FIXME: read all input to the string, and process citations in the input text
-    //auto input = readFromFile(argv[argc -1]);
-    // ...
     std::string citationPath;
     std::string outputPath;
     std::string inputPath;
-    // for (int i = 1; i < argc; i++) {
-    //     std::string arg(argv[i]);
-    //     if (arg == "-c" && i + 1 < argc) {
-    //         citationPath = argv[++i];
-    //     } else if (arg == "-o" && i + 1 < argc) {
-    //         outputPath = argv[++i];
-    //     } else {
-    //         inputPath = arg;
-    //     }
-    // }
+
     if(argc < 4){
         std::cerr << "more arguments needed" << std::endl;
         std::exit(1);
