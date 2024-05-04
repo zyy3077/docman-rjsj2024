@@ -109,9 +109,9 @@ std::string readFromFile(const std::string& filename) {
     while (file.get(ch) && !file.eof()) {
         content += ch;
     }
-    if(content.back() != '\n'){
-        content += '\n';
-    }
+    // if(content.back() != '\n'){
+    //     content += '\n';
+    // }
     return content;
 }
 
@@ -125,9 +125,9 @@ std::string readFromStdin() {
         std::cerr << "Standard input is empty." << std::endl;
         std::exit(1);
     }
-    if(content.back() != '\n'){
-        content += '\n';
-    }
+    // if(content.back() != '\n'){
+    //     content += '\n';
+    // }
 
     return content;
 }
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
         output = &std::cout;
     }
 
-    *output << input;  // print the paragraph first
+    *output << input << '\n';  // print the paragraph first
     *output << "\nReferences:\n";
     
     for (auto c : printedCitations) {
