@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
             *output << "article: " << b->author << ", "<< b->title << ", "<< b->journal << ", "<< b->year << ", " << b->volume << ", " << b->issue << '\n';
         }
     }
-    //delete output;
+    delete output;
     for (auto c : citations) {
         delete c;
     }
