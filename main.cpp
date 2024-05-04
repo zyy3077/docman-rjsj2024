@@ -109,10 +109,10 @@ std::string readFromFile(const std::string& filename) {
     while (std::getline(file, line)) {
         content += line + '\n';
     }
-    if (file.fail()) {
-        std::cerr << "Failed to read input file: " << filename << std::endl;
-        std::exit(1);
-    }
+    // if (file.fail()) {
+    //     std::cerr << "Failed to read input file: " << filename << std::endl;
+    //     std::exit(1);
+    // }
 
     return content;
 }
