@@ -10,6 +10,24 @@
 httplib::Client client{ API_ENDPOINT };
 std::vector<std::string> citationID{};
 
+void checkFile(std::ifstream& file){
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file " << std::endl;
+        std::exit(1);
+    }
+    if (file.peek() == std::ifstream::traits_type::eof()) {
+        std::cerr << "Empty file: " << std::endl;
+        std::exit(1);
+    }
+    if (file.fail()) {
+        std::cerr << "Failed to parse JSON from file: " << std::endl;
+        std::exit(1);
+    }
+    if (file.eof()) {
+        std::cerr << "Reached end of file: " << std::endl;
+        std::exit(1);
+    }
+}
 std::vector<Citation*> loadCitations(const std::string& filename) {
     // FIXME: load citations from file
     //初始化所有json中的book web article，包含标题 id 作者等所有信息
@@ -17,37 +35,8 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 
     //nlohmann::json data = nlohmann::json::parse(file);
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        std::exit(1);
-    }
-    if (file.peek() == std::ifstream::traits_type::eof()) {
-        std::cerr << "Empty file: " << filename << std::endl;
-        std::exit(1);
-    }
-    if (file.fail()) {
-        std::cerr << "Failed to parse JSON from file: " << filename << std::endl;
-        std::exit(1);
-    }
-    if (file.eof()) {
-        std::cerr << "Reached end of file: " << filename << std::endl;
-        std::exit(1);
-    }
+    checkFile(file);
     nlohmann::json data = nlohmann::json::parse(file);
-
-    //     
-
-    //     data = nlohmann::json::parse(file);
-    //     // Check if data is an object
-    //     if (!data.is_object() || data.find("citations") == data.end()) {
-    //         std::cerr << "Invalid JSON object in file: " << filename << std::endl;
-    //         std::exit(1);
-    //     }
-    //     // use data...
-    // } catch (nlohmann::json::parse_error& e) {
-    //     std::cerr << "Failed to parse JSON from file: " << e.what() << std::endl;
-    //     std::exit(1);
-    // }
 
     for(auto c : data["citations"]) {
         if(!c["type"].is_string() || !c["id"].is_string()){
@@ -112,10 +101,7 @@ std::vector<Citation*> loadCitations(const std::string& filename) {
 std::string readFromFile(const std::string& filename) {
     //读input文章
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open input file: " << filename << std::endl;
-        std::exit(1);
-    }
+    checkFile(file);
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     if (!content.empty() && content.back() == '\n') {
         content.pop_back();
