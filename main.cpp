@@ -234,8 +234,7 @@ int main(int argc, char** argv) {
     }
 
     *output << input;  // print the paragraph first
-    *output << std::endl;
-    *output << "\nReferences:\n";
+    *output << "\n\nReferences:\n";
     
     for (auto c : printedCitations) {
         // FIXME: print citation
